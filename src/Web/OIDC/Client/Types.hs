@@ -55,6 +55,9 @@ data OpenIdException =
     | UnsecuredJwt ByteString
     | JwtExceptoin JwtError
     | ValidationException Text
+    | UnknownState
+    | MissingNonceInResponse
+    | MismatchedNonces
   deriving (Show, Typeable)
 
 instance Exception OpenIdException
@@ -65,7 +68,8 @@ data SessionStore m = SessionStore
     { sessionStoreGenerate :: m ByteString
     -- ^ Generate state and nonce at random
     , sessionStoreSave :: State -> Nonce -> m ()
-    , sessionStoreGet :: m (Maybe State, Maybe Nonce)
+    , sessionStoreGet :: State -> m (Maybe Nonce)
+    -- ^ Returns 'Nothing' if 'State' is unknown
     , sessionStoreDelete :: m ()
     -- ^ Should delete at least nonce
     }
